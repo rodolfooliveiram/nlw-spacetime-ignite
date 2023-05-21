@@ -1,5 +1,5 @@
-import { ReactNode } from "react";
 import "./globals.css";
+import { ReactNode } from "react";
 import {
   Roboto_Flex as Roboto,
   Bai_Jamjuree as BaiJamjuree,
