@@ -9,13 +9,16 @@ import {
 } from "react-native";
 import Icon from "@expo/vector-icons/Feather";
 import NLWLogo from "../src/assets/nlw-spacetime-logo.svg";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useState } from "react";
 import * as ImagePicker from "expo-image-picker";
+import * as SecureStore from "expo-secure-store";
+import { api } from "../src/lib/api";
 
 export default function NewMemories() {
   const { bottom, top } = useSafeAreaInsets();
+  const router = useRouter();
 
   const [preview, setPreview] = useState<string | null>(null);
   const [isPublic, setIsPublic] = useState(false);
@@ -31,11 +34,49 @@ export default function NewMemories() {
       if (result.assets[0]) {
         setPreview(result.assets[0].uri);
       }
-    } catch (err) {}
+    } catch (err) {
+      // Sem tratamento
+    }
   }
 
-  function handleCreateMemory() {
-    console.log(content, isPublic);
+  async function handleCreateMemory() {
+    const token = await SecureStore.getItemAsync("token");
+
+    let coverUrl = "";
+
+    if (preview) {
+      const uploadFormData = new FormData();
+
+      uploadFormData.append("file", {
+        uri: preview,
+        name: "image.jpg",
+        type: "image/jpg",
+      } as any);
+
+      const uploadResponse = await api.post("/upload", uploadFormData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      coverUrl = uploadResponse.data.fileURL;
+    }
+
+    await api.post(
+      "/memories",
+      {
+        content,
+        isPublic,
+        coverUrl,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    router.push("/memories");
   }
 
   return (
@@ -89,6 +130,7 @@ export default function NewMemories() {
           multiline
           value={content}
           onChangeText={setContent}
+          textAlignVertical="top"
           className="p-0 font-regular text-lg text-gray-50"
           placeholderTextColor="#56565a"
           placeholder="Adicione fotos, vídeos e conte-nos sobre essa experiência que você quer lembrar para sempre."
