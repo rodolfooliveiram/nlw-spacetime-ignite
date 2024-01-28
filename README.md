@@ -23,7 +23,7 @@ Desenvolvida com ReactJS, React Native, NextJS, NodeJS, Tailwind e TypeScript du
 - NextJS
 - NodeJS
 - Tailwind
-- TipeScript
+- TypeScript
 
 ## 👨‍💻 Dev
 
